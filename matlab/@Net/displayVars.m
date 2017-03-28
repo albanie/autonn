@@ -37,6 +37,7 @@ else
 end
 opts.showRange = true ;
 opts.showMemory = true ;
+%opts.showRF = true ;
 opts.showLinks = usejava('desktop') ;
 opts = vl_argparse(opts, varargin) ;
 
@@ -63,6 +64,7 @@ if opts.showLinks
     varname = [netname '.vars'] ;
   end
 end
+keyboard
 
 % print information for each variable
 funcs = cell(numel(vars), 1) ;
@@ -71,6 +73,7 @@ flags = cell(numel(vars), 1) ;
 mins = NaN(numel(vars), 1) ;
 maxs = NaN(numel(vars), 1) ;
 mem = zeros(numel(vars), 1) ;
+rf = cell(numel(vars), 1) ;
 for i = 1:numel(vars)
   % function of each layer, as a string
   if strcmp(info(i).type, 'layer')
@@ -137,6 +140,28 @@ for i = 1:numel(vars)
       maxs(i) = gather(max(v(:))) ;
     end
   end
+
+  % receptive fields
+  %TODO: dilated convolutions
+  if opts.showRF
+    %if strcmp(info(i).type, 'layer')
+      %l = net.forward(info(i).index) ;
+      %if isequal(l.func, @vl_nnconv)
+        %sz = size(vars{l.inputVars(2)}) 
+        %rf{i} = sz(1:2) 
+      %end
+    %end
+       %%switch func
+         %%case @vl_nnconv
+           %%net.forward(idx).inputVars(2)
+         %%otherwise
+           %%keyboard
+        %%end
+       %%net.forward(idx).func
+    %else
+      %rf{i} = [] ;
+    %end
+  end
   
   % memory
   if opts.showMemory
@@ -171,6 +196,12 @@ if opts.showRange  % convert to string, filling NaNs with spaces
   maxStr = num2cell(maxStr, 2) ;
 end
 
+%if opts.showRF
+  %%rfStr = cellfun(@num2str, rf, 'Uni', 0) ;
+  %%rfStr = cellfun(@(x) formatRF(x), rf, 'Uni', 0) ;
+  %%, rfStr = cellfun(@(x) sprintf('[%d,%d]', x(:), rf, 'Uni', 0) ;
+%end
+
 if opts.showMemory
   suffixes = {'B ', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB'} ;
   place = floor(log(mem) / log(1024)) ;  % 0-based index into 'suffixes'
@@ -203,6 +234,11 @@ for i = 1:2
   if opts.showRange
     table = [table, [{'Min', 'Max'}; minStr(idx), maxStr(idx)]] ;
   end
+
+  % display receptive fields only for forward direction
+  %if opts.showRF && (i == 1) 
+    %table = [table, [{'RF'}; rfStr(idx)]] ;
+  %end
   
   if opts.showMemory
     table = [table, [{'Memory'}; memStr(idx)]] ;
@@ -239,4 +275,10 @@ function str = leftAlign(str)
   str = cellfun(@(s, n) {[s blanks(n)]}, str, num2cell(numBlanks)) ;
 end
 
+function str = formatRF(x)
+  if ~isempty(x)
+    keyboard
+  else
+    str = '' ;
+end
 
