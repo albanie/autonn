@@ -20,6 +20,11 @@ function eval(net, inputs, mode, derOutput, accumulateParamDers)
 %       without setting testMode to true.
 %     * 'backward' performs only the backward computation (assumes eval was
 %       ran in forward mode beforehand).
+%     * 'testmemoryless' operates identically to test mode, except that
+%       intermediate activations are not stored in memory (can be useful for
+%       enabling larger batch sizes). If this mode is specified, an additional
+%       argument can be passed as a cell array containing the names of variables
+%       that should be preserved.
 %
 %   OBJ.EVAL(INPUTS, MODE, DEROUTPUT) also specifies the output derivatives
 %   of the network. This can be a single value, or multiple (one per
@@ -65,7 +70,7 @@ function eval(net, inputs, mode, derOutput, accumulateParamDers)
   switch mode
   case {'normal', 'forward', 'backward'}
     testMode = false ;
-  case 'test'  % test mode
+  case {'test', 'testmemoryless'}  % test mode
     testMode = true ;
   otherwise
     error('Unknown mode ''%s''.', mode) ;
@@ -81,7 +86,7 @@ function eval(net, inputs, mode, derOutput, accumulateParamDers)
   net.vars = {} ;  % allows Matlab to release memory when needed
 
   % forward pass
-  if ~strcmp(mode, 'backward')
+  if ismember(mode, {'forward', 'normal',' test'})
     for k = 1:numel(forward)
       layer = forward(k) ;
       args = layer.args ;
@@ -92,6 +97,12 @@ function eval(net, inputs, mode, derOutput, accumulateParamDers)
 
       vars(layer.outputVar) = out(layer.outputArgPos);
     end
+  end
+
+  % memoryless forward pass
+  if strcmp(mode, 'testmemoryless')
+    if isa(derOutput, 'numeric'), keep = {} ; else, keep = derOutput ; end
+    vars = evalMemoryless(net, vars, keep) ;
   end
 
   % backward pass

@@ -55,6 +55,7 @@ classdef Net < handle
   methods (Access = private)
     compile(net, varargin)
     optimizeVars(net, opts, objs)
+    vars = evalMemoryless(net, vars, precious)
   end
   
   methods
