@@ -22,8 +22,8 @@ function eval(net, inputs, mode, derOutput, accumulateParamDers)
 %       ran in forward mode beforehand).
 %     * 'testmemoryless' operates identically to test mode, except that
 %       intermediate activations are not stored in memory (can be useful for
-%       enabling larger batch sizes). If this mode is specified, an additional
-%       argument can be passed as a cell array containing the names of variables
+%       enabling larger batch sizes). If this mode is specified, DEROUTPUT
+%       will be interpreted as a cell array containing the names of variables
 %       that should be preserved.
 %
 %   OBJ.EVAL(INPUTS, MODE, DEROUTPUT) also specifies the output derivatives
@@ -101,7 +101,7 @@ function eval(net, inputs, mode, derOutput, accumulateParamDers)
 
   % memoryless forward pass
   if strcmp(mode, 'testmemoryless')
-    if isa(derOutput, 'numeric'), keep = {} ; else, keep = derOutput ; end
+    if isa(derOutput, 'numeric'), keep = {} ; else keep = derOutput ; end
     vars = evalMemoryless(net, vars, keep) ;
   end
 
