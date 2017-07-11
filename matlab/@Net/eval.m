@@ -86,7 +86,7 @@ function eval(net, inputs, mode, derOutput, accumulateParamDers)
   net.vars = {} ;  % allows Matlab to release memory when needed
 
   % forward pass
-  if ismember(mode, {'forward', 'normal',' test'})
+  if ismember(mode, {'forward', 'normal', 'test'})
     for k = 1:numel(forward)
       layer = forward(k) ;
       args = layer.args ;

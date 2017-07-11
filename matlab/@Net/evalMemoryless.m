@@ -2,11 +2,12 @@ function vars = evalMemoryless(net, vars, precious)
 %EVALMEMORYLESS test-mode network evaluation without intermediate storage
 %   VARS = EVALMEMORYLESS(NET, VARS, PRECIOUS) computes a forward pass of 
 %   `NET` in which intermediate activations are cleared after they are no 
-%   longer needed (can be useful for enabling larger batch sizes). 
+%   longer needed. This adds a small runtime overhead, but can be useful 
+%   for enabling larger batch sizes. 
 %
 %   `VARS` is a cell array containing a copy of the network variables 
 %   `PRECIOUS` is a cell array of variable names to be preserved during
-%    execution
+%    execution. If empty, the final output variable is saved by default.
 %
 % Copyright (C) 2017 Samuel Albanie and Joao F. Henriques.
 % All rights reserved.
@@ -16,7 +17,11 @@ function vars = evalMemoryless(net, vars, precious)
 
   forward = net.forward ;
   deps = zeros(size(vars)) ; % compute var dependency graph
-  deps(net.getVarIndex(precious)) = 1 ; % mark variables as "precious"
+  if isempty(precious)
+    deps(forward(end).outputVar) = 1 ; % final output preserved
+  else
+    deps(net.getVarIndex(precious)) = 1 ; % mark variables as "precious"
+  end
   for k = 1:numel(forward)
     layer = forward(k) ; 
     deps(layer.inputVars) = deps(layer.inputVars) + 1 ;
