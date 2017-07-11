@@ -17,6 +17,7 @@ function vars = evalMemoryless(net, vars, precious)
 
   forward = net.forward ;
   deps = zeros(size(vars)) ; % compute var dependency graph
+  deps(~cellfun(@isempty, vars)) = 1 ; % preserve params and inputs
   if isempty(precious)
     deps(forward(end).outputVar) = 1 ; % final output preserved
   else
